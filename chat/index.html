@@ -36,7 +36,7 @@
 
   <main id="chat-shell" class="wrap chat-shell" tabindex="-1">
     <section id="chat-panel" class="chat-panel" aria-label="Conversation">
-      <div class="chat-header wrap" role="toolbar" aria-label="Conversation actions">
+      <div class="chat-header wrap" id="chat-header" role="toolbar" aria-label="Conversation actions">
         <div class="grow"></div>
         <select id="mode-select" class="mode-pill" aria-label="Mode">
           <option value="quality" selected>Quality</option>
@@ -50,18 +50,20 @@
           <img class="icon-img" src="/assets/icons/share.svg" alt="" loading="lazy" decoding="async">
         </button>
       </div>
-      <ol id="chat-log" class="chat-log" aria-live="polite" aria-relevant="additions"></ol>
-      <button id="jump-latest" class="btn ghost to-bottom" type="button" hidden aria-label="Jump to latest">Jump to latest</button>
-      <form id="chat-form" class="chat-form" novalidate>
-        <label class="sr-only" for="chat-input">Message</label>
-        <textarea id="chat-input" rows="1" placeholder="Ask Psyber Nexus…" autocomplete="off"></textarea>
-        <div class="chat-actions">
-          <button id="send-btn" class="btn" type="submit">Send</button>
-          <button id="stop-btn" class="btn ghost" type="button" hidden>Stop</button>
-        </div>
-        <div id="chat-alert" class="chat-alert" role="status" aria-live="polite"></div>
-      </form>
-    </section>
+      <div id="chat-rail">
+        <ol id="chat-log" class="chat-log" aria-live="polite" aria-relevant="additions"></ol>
+        <button id="jump-latest" class="btn ghost to-bottom" type="button" hidden aria-label="Jump to latest">Jump to latest</button>
+        <form id="chat-form" class="chat-form" novalidate>
+          <label class="sr-only" for="chat-input">Message</label>
+          <textarea id="chat-input" rows="1" placeholder="Ask Psyber Nexus…" autocomplete="off"></textarea>
+          <div class="chat-actions">
+            <button id="send-btn" class="btn" type="submit">Send</button>
+            <button id="stop-btn" class="btn ghost" type="button" hidden>Stop</button>
+          </div>
+          <div id="chat-alert" class="chat-alert" role="status" aria-live="polite"></div>
+        </form>
+      </div>
+      </section>
     <aside id="chat-help" class="chat-help" aria-label="Shortcuts and tips">
       <h2 class="h4">Tips</h2>
       <ul class="chip-list">
@@ -70,6 +72,16 @@
         <li><button class="chip" data-fill="Outline ethical guidelines and provenance for analyses.">Ethics & provenance</button></li>
       </ul>
     </aside>
+    <button id="tips-toggle" class="tips-toggle btn ghost" aria-controls="tips-drawer" aria-expanded="false" aria-label="Open tips" hidden>Tips</button>
+    <div id="tips-drawer" class="tips-drawer" hidden>
+      <div class="tips-sheet">
+        <header class="tips-bar">
+          <strong>Tips</strong>
+          <button id="tips-close" class="icon-btn" aria-label="Close">✕</button>
+        </header>
+        <div class="tips-body"></div>
+      </div>
+    </div>
   </main>
 
   <script type="module" src="/assets/js/chat.js"></script>

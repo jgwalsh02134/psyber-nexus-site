@@ -334,9 +334,15 @@ async function shareText(text){
 }
 
 // --- Helpers for scroll management ---
+const panelEl = document.getElementById('chat-panel');
+const headerEl = document.getElementById('chat-header');
+const railEl = document.getElementById('chat-rail');
 const logEl = document.getElementById('chat-log');
 const jumpBtn = document.getElementById('jump-latest');
 const inputElDom = document.getElementById('chat-input');
+const tipsToggle = document.getElementById('tips-toggle');
+const tipsDrawer = document.getElementById('tips-drawer');
+const tipsClose = document.getElementById('tips-close');
 
 function isNearBottom(el, thresh = 48){
   return el.scrollHeight - el.scrollTop - el.clientHeight <= thresh;
@@ -353,6 +359,47 @@ function scrollToBottom(el){ el.scrollTop = el.scrollHeight; }
   setVVH();
   vv && vv.addEventListener('resize', setVVH);
   globalThis.addEventListener('orientationchange', setVVH);
+})();
+
+// Ensure header is placed immediately above rail, and avoid duplicates
+(function fixHeader(){
+  try{
+    if (headerEl && panelEl && railEl && headerEl.nextElementSibling !== railEl) {
+      panelEl.insertBefore(headerEl, railEl);
+    }
+    const headers = document.querySelectorAll('.chat-header');
+    if (headers.length > 1){ headers.forEach((h,i)=>{ if(i>0) h.remove(); }); }
+  }catch{ /* noop */ }
+})();
+
+// Tips drawer for mobile; toggle visibility based on viewport width
+(function initTips(){
+  if (!tipsToggle || !tipsDrawer) return;
+  const body = tipsDrawer.querySelector('.tips-body');
+  const source = document.getElementById('chat-help');
+  if (source && body && !body.childElementCount) body.innerHTML = source.innerHTML;
+
+  function open(){
+    tipsDrawer.hidden = false;
+    tipsToggle.setAttribute('aria-expanded','true');
+    document.documentElement.style.overflow = 'hidden';
+  }
+  function close(){
+    tipsDrawer.hidden = true;
+    tipsToggle.setAttribute('aria-expanded','false');
+    document.documentElement.style.overflow = '';
+  }
+  tipsToggle.addEventListener('click', open);
+  tipsClose?.addEventListener('click', close);
+  tipsDrawer.addEventListener('click', (e)=>{ if (!e.target.closest('.tips-sheet')) close(); });
+
+  function updateToggle(){
+    const isMobile = globalThis.innerWidth <= 1024;
+    tipsToggle.hidden = !isMobile;
+    if (!isMobile) close();
+  }
+  updateToggle();
+  globalThis.addEventListener('resize', updateToggle, { passive: true });
 })();
 
 if (logEl){
