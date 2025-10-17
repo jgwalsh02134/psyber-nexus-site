@@ -94,10 +94,14 @@ body[data-nav-open="true"] .nav { transform: translateY(0); }
 html.nav-open .nav-overlay{display:block}
 [hidden]{display:none !important}
 .nav-panel a[aria-current="page"], .nav a[aria-current="page"]{text-decoration:underline}
-/* Mobile nav visibility */
-#site-nav { display: none; }
-body[data-nav-open="true"] #site-nav { display: block; }
-#nav-toggle[aria-expanded="true"] + #site-nav { display: block; }
+/* Desktop inline nav reinforcement and mobile hide */
+@media (min-width:900px){
+  #site-nav{display:flex !important}
+  #site-nav[hidden]{display:flex !important}
+}
+@media (max-width:899.98px){
+  #site-nav{display:none}
+}
 
 .hero { padding-block: clamp(48px, 10vw, 96px); background: radial-gradient(1200px 600px at 50% -20%, rgba(31,111,235,0.15), transparent), var(--bg); border-bottom: 1px solid var(--line); }
 .kicker { color: var(--muted); font-size: var(--step-0); text-transform: uppercase; letter-spacing: 0.08em; }

@@ -49,6 +49,17 @@ function navSetup() {
 
   // Close on Escape
   globalThis.document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+
+  // Ensure desktop nav is visible when width ≥ 900px
+  function fixDesktopNav(){
+    try {
+      if (globalThis.matchMedia && globalThis.matchMedia('(min-width: 900px)').matches) {
+        desktopNav.removeAttribute('hidden');
+      }
+    } catch (_) { /* ignore */ }
+  }
+  fixDesktopNav();
+  globalThis.addEventListener('resize', fixDesktopNav);
 }
 
 function setActiveNav() {
