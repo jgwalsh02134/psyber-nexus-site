@@ -60,19 +60,18 @@ function renderItem(role, text, timeStr = ts()) {
   const content = document.createElement('div');
   content.className = 'content';
   content.textContent = text;
-  const actions = document.createElement('div');
-  actions.className = 'msg-actions';
-  actions.innerHTML = `
+  const actionsRow = document.createElement('div');
+  actionsRow.className = 'msg-actions-row';
+  actionsRow.setAttribute('role', 'group');
+  actionsRow.setAttribute('aria-label', 'Message actions');
+  actionsRow.innerHTML = `
     <button class="icon-btn copy-md" aria-label="Copy as Markdown" title="Copy as Markdown">
       <img class="icon-img" src="/assets/icons/copy.svg" alt="" loading="lazy" decoding="async">
-    </button>
-    <button class="icon-btn share-msg" aria-label="Share message" title="Share">
-      <img class="icon-img" src="/assets/icons/share.svg" alt="" loading="lazy" decoding="async">
     </button>
   `;
   li.appendChild(meta);
   li.appendChild(content);
-  li.appendChild(actions);
+  li.appendChild(actionsRow);
   els.log?.appendChild(li);
   if (autoScroll) li.scrollIntoView({ block: 'end' });
   return { li, contentEl: content };
@@ -268,21 +267,18 @@ function init() {
   attachChips();
   growTextarea();
 
-  // Per-message delegated actions
+  // Per-message delegated actions (copy only)
   els.log?.addEventListener('click', async (e) => {
-    const copyBtn = e.target.closest('.copy-md');
-    const shareBtn = e.target.closest('.share-msg');
-    if (!copyBtn && !shareBtn) return;
+    const btn = e.target.closest('.copy-md');
+    if (!btn) return;
     const li = e.target.closest('.msg');
     if (!li) return;
+    const index = Array.prototype.indexOf.call(els.log.children, li);
+    const list = messages.filter(m => m.role !== 'system');
     const role = li.classList.contains('user') ? 'user' : 'assistant';
     const text = li.querySelector('.content')?.textContent || '';
-    const md = msgToMarkdown({ role, content: text });
-    if (copyBtn) await copyText(md);
-    if (shareBtn) {
-      const plain = msgToPlain({ role, content: text });
-      await shareText(plain);
-    }
+    const msg = list[index] || { role, content: text };
+    await copyText(msgToMarkdown(msg));
   });
 
   // Thread actions
