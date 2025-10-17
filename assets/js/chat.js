@@ -219,6 +219,10 @@ function stopStreaming() {
 function msgToMarkdown(m){ return `**${m.role==='user'?'You':'Psyber Nexus'}:** ${m.content}`; }
 function threadToMarkdown(list){ return list.filter(x=>x.role!=='system').map(msgToMarkdown).join('\n\n'); }
 
+// Plain text helpers (for share)
+function msgToPlain(m){ return `${m.role==='user'?'You':'Psyber Nexus'}: ${m.content}`; }
+function threadToPlain(list){ return list.filter(x=>x.role!=='system').map(msgToPlain).join('\n\n'); }
+
 // Toast-like inline status
 function toast(msg, timeout=1500){
   if (!els.alert) return;
@@ -275,12 +279,15 @@ function init() {
     const text = li.querySelector('.content')?.textContent || '';
     const md = msgToMarkdown({ role, content: text });
     if (copyBtn) await copyText(md);
-    if (shareBtn) await shareText(md);
+    if (shareBtn) {
+      const plain = msgToPlain({ role, content: text });
+      await shareText(plain);
+    }
   });
 
   // Thread actions
   els.copyThread?.addEventListener('click', async () => { await copyText(threadToMarkdown(messages)); });
-  els.shareThread?.addEventListener('click', async () => { await shareText(threadToMarkdown(messages)); });
+  els.shareThread?.addEventListener('click', async () => { await shareText(threadToPlain(messages)); });
 
   // Scroll to bottom controls
   globalThis.addEventListener('scroll', updateToBottom, { passive: true });
