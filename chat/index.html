@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <title>Chat · Psyber Nexus</title>
+  <meta name="description" content="Psyber Nexus chatbot streaming via secure proxy.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d12">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/assets/css/site.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to main content</a>
+
+  <header class="header" role="banner">
+    <div class="wrap" style="justify-content: space-between; display:flex; align-items:center; gap:12px;">
+      <a class="logo" href="/">Psyber Nexus</a>
+      <nav aria-label="Utility">
+        <a class="btn ghost" href="/">Back to Home</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap chat-shell" tabindex="-1">
+    <section class="chat-panel" aria-label="Conversation">
+      <ol id="chat-log" class="chat-log" aria-live="polite" aria-relevant="additions"></ol>
+      <form id="chat-form" class="chat-form" novalidate>
+        <label class="sr-only" for="chat-input">Message</label>
+        <textarea id="chat-input" rows="1" placeholder="Ask Psyber Nexus…" autocomplete="off"></textarea>
+        <div class="chat-actions">
+          <button id="send-btn" class="btn" type="submit">Send</button>
+          <button id="stop-btn" class="btn ghost" type="button" hidden>Stop</button>
+        </div>
+        <div id="chat-alert" class="chat-alert" role="status" aria-live="polite"></div>
+      </form>
+    </section>
+    <aside class="chat-help" aria-label="Shortcuts">
+      <h2 class="h4">Tips</h2>
+      <ul class="chip-list">
+        <li><button class="chip" data-fill="Summarize the Psyber Nexus concept.">Concept summary</button></li>
+        <li><button class="chip" data-fill="Explain the role of psychology in cybersecurity.">Psychology × Cyber</button></li>
+        <li><button class="chip" data-fill="Outline ethical guidelines and provenance for analyses.">Ethics & provenance</button></li>
+      </ul>
+    </aside>
+  </main>
+
+  <script type="module" src="/assets/js/chat.js"></script>
+</body>
+</html>
