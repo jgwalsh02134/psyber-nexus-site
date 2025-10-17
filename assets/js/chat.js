@@ -18,12 +18,12 @@ const els = {
   alert: $("#chat-alert"),
   copyThread: $("#copy-thread"),
   shareThread: $("#share-thread"),
-  toBottom: $("#to-bottom"),
+  // replaced legacy to-bottom with jump-latest button
 };
 
 let controller = null; // AbortController
 let streaming = false;
-let autoScroll = true;
+let shouldStick = true; // whether we should keep view pinned to bottom during streaming
 
 // Messages that go to the API
 let messages = [{ role: "system", content: SYS_PROMPT }];
@@ -73,7 +73,7 @@ function renderItem(role, text, timeStr = ts()) {
   li.appendChild(content);
   li.appendChild(actionsRow);
   els.log?.appendChild(li);
-  if (autoScroll) li.scrollIntoView({ block: 'end' });
+  if (shouldStick) li.scrollIntoView({ block: 'end' });
   return { li, contentEl: content };
 }
 
@@ -123,7 +123,9 @@ async function streamTo(el, onDone) {
   try {
     setUIBusy(true);
     els.alert.textContent = '';
-    autoScroll = atBottom();
+    // initialize shouldStick from current scroll state of the log
+    const logEl = document.getElementById('chat-log');
+    if (logEl) shouldStick = isNearBottom(logEl);
 
     const res = await fetch('/api/chat', {
       method: 'POST',
@@ -138,6 +140,8 @@ async function streamTo(el, onDone) {
     const decoder = new TextDecoder();
     let buffer = '';
     let done = false;
+    let assistantMd = '';
+    let assistantPlain = '';
 
     while (!done) {
       const { value, done: d } = await reader.read();
@@ -149,23 +153,42 @@ async function streamTo(el, onDone) {
           const evt = buffer.slice(0, idx).trim();
           buffer = buffer.slice(idx + 2);
           if (!evt) continue;
-          const line = evt.split('\n').find(l => l.startsWith('data:')) || '';
-          const data = line.replace(/^data:\s?/, '').trim();
-          if (!data) continue;
-          if (data === '[DONE]') { done = true; break; }
+          const lines = evt.split('\n');
+          const evLine = lines.find(l => l.startsWith('event:')) || '';
+          const dataLine = lines.find(l => l.startsWith('data:')) || '';
+          const payload = dataLine.replace(/^data:\s?/, '').trim();
+          if (!payload) continue;
+          if (payload === '[DONE]') { done = true; break; }
           try {
-            const json = JSON.parse(data);
+            const json = JSON.parse(payload);
+            // Responses API event delta
+            if (evLine.startsWith('event:')) {
+              const name = evLine.slice(6).trim();
+              if (name === 'response.output_text.delta') {
+                const delta = typeof json?.delta === 'string' ? json.delta : (json?.delta?.text ?? '');
+                if (delta) {
+                  assistantMd += delta;
+                  assistantPlain = stripMarkdown(assistantMd);
+                  el.textContent = assistantPlain;
+                  if (shouldStick && logEl) scrollToBottom(logEl);
+                }
+              }
+              continue;
+            }
+            // Chat Completions style
             const token = json.choices?.[0]?.delta?.content ?? json.choices?.[0]?.text ?? '';
             if (token) {
-              el.textContent += token;
-              if (autoScroll) el.parentElement?.scrollIntoView({ block: 'end' });
+              assistantMd += token;
+              assistantPlain = stripMarkdown(assistantMd);
+              el.textContent = assistantPlain;
+              if (shouldStick && logEl) scrollToBottom(logEl);
             }
           } catch { /* noop */ }
         }
       }
     }
 
-    onDone?.();
+    onDone?.(assistantPlain, assistantMd);
   } catch (err) {
     if (controller?.signal?.aborted) {
       els.alert.textContent = 'Generation stopped.';
@@ -196,9 +219,10 @@ function onSubmit(e) {
   growTextarea();
 
   // stream and finalize
-  streamTo(contentEl, () => {
-    const finalText = contentEl.textContent || '';
-    messages.push({ role: 'assistant', content: finalText });
+  shouldStick = true; // stick to bottom when sending a new message
+  streamTo(contentEl, (finalPlain, finalMd) => {
+    const finalText = finalPlain || contentEl.textContent || '';
+    messages.push({ role: 'assistant', content: finalText, md: finalMd });
     saveMessages();
   });
 }
@@ -215,12 +239,42 @@ function stopStreaming() {
 }
 
 // Markdown helpers
-function msgToMarkdown(m){ return `**${m.role==='user'?'You':'Psyber Nexus'}:** ${m.content}`; }
+function msgToMarkdown(m){ return `**${m.role==='user'?'You':'Psyber Nexus'}:** ${m.md ?? m.content}`; }
 function threadToMarkdown(list){ return list.filter(x=>x.role!=='system').map(msgToMarkdown).join('\n\n'); }
 
 // Plain text helpers (for share)
 function msgToPlain(m){ return `${m.role==='user'?'You':'Psyber Nexus'}: ${m.content}`; }
 function threadToPlain(list){ return list.filter(x=>x.role!=='system').map(msgToPlain).join('\n\n'); }
+
+// Markdown → Plain-text (safe). Remove tokens and HTML; keep readable text.
+function stripMarkdown(md){
+  if (!md) return '';
+  let s = String(md);
+  // code fences: drop backticks
+  s = s.replace(/```[\s\S]*?```/g, m => m.replace(/```/g, ''));
+  // inline code
+  s = s.replace(/`([^`]+)`/g, '$1');
+  // headings
+  s = s.replace(/^\s{0,3}#{1,6}\s+/gm, '');
+  // bold/italic
+  s = s.replace(/\*\*([^*]+)\*\*/g, '$1')
+       .replace(/\*([^*]+)\*/g, '$1')
+       .replace(/__([^_]+)__/g, '$1')
+       .replace(/_([^_]+)_/g, '$1');
+  // blockquote
+  s = s.replace(/^\s{0,3}>\s?/gm, '');
+  // lists
+  s = s.replace(/^\s*[-*+]\s+/gm, '• ')
+       .replace(/^\s*\d+\.\s+/gm, (m)=> m.replace(/\d+\.\s+/, (m.match(/\d+/)||['1'])[0] + '. '));
+  // links/images
+  s = s.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '$1 ($2)')
+       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1 ($2)');
+  // HTML tags
+  s = s.replace(/<\/?[^>]+>/g, '');
+  // escaped punctuation (unescape common markdown/HTML punctuation)
+  s = s.replace(/\\(\]|\[|\(|\)|>|#|\+|\.|!|-|\*|_|`|~)/g, '$1');
+  return s;
+}
 
 // Toast-like inline status
 function toast(msg, timeout=1500){
@@ -244,14 +298,27 @@ async function shareText(text){
   await copyText(text);
 }
 
-// Scroll helpers
-function atBottom(){
-  const near = Math.abs(((globalThis.innerHeight || 0) + (globalThis.scrollY || 0)) - document.documentElement.scrollHeight) < 80;
-  return near;
+// --- Helpers for scroll management ---
+const logEl = document.getElementById('chat-log');
+const jumpBtn = document.getElementById('jump-latest');
+
+function isNearBottom(el, thresh = 32){
+  return el.scrollHeight - el.scrollTop - el.clientHeight <= thresh;
 }
-function updateToBottom(){
-  const show = !atBottom();
-  if (els.toBottom) els.toBottom.hidden = !show;
+function scrollToBottom(el){ el.scrollTop = el.scrollHeight; }
+
+if (logEl){
+  shouldStick = isNearBottom(logEl);
+  logEl.addEventListener('scroll', () => {
+    const near = isNearBottom(logEl);
+    shouldStick = near;
+    if (jumpBtn) jumpBtn.hidden = near;
+  });
+  jumpBtn?.addEventListener('click', () => {
+    scrollToBottom(logEl);
+    shouldStick = true;
+    jumpBtn.hidden = true;
+  });
 }
 
 function init() {
@@ -284,15 +351,6 @@ function init() {
   // Thread actions
   els.copyThread?.addEventListener('click', async () => { await copyText(threadToMarkdown(messages)); });
   els.shareThread?.addEventListener('click', async () => { await shareText(threadToPlain(messages)); });
-
-  // Scroll to bottom controls
-  globalThis.addEventListener('scroll', updateToBottom, { passive: true });
-  els.toBottom?.addEventListener('click', () => {
-    const last = els.log?.lastElementChild;
-    last?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    updateToBottom();
-  });
-  updateToBottom();
 }
 
 document.addEventListener('DOMContentLoaded', init);
