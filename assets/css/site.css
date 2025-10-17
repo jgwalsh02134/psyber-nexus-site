@@ -93,6 +93,14 @@ code, pre{ font-family:var(--pn-font-mono); }
   --header-h: 56px;
   /* dynamic viewport height for iOS keyboard; updated via JS */
   --vvh: 100dvh;
+  /* responsive rail, bubbles, and typography */
+  --rail-max: 62rem;
+  --bubble-max: 80ch;
+  --fs-base: clamp(0.98rem, 0.92rem + 0.35vw, 1.06rem);
+  --fs-msg:  clamp(1.00rem, 0.96rem + 0.30vw, 1.10rem);
+  --lh-body: 1.60; 
+  --lh-msg:  1.66;
+  --gap-xs: 10px; --gap-sm: 14px; --gap-md: 20px; --gap-lg: 28px;
 }
 
 * { box-sizing: border-box; }
@@ -261,7 +269,7 @@ input:focus-visible, textarea:focus-visible, .btn:focus-visible, a:focus-visible
 .chat-panel{border:1px solid var(--line);background:rgba(255,255,255,.02);border-radius:var(--radius,12px);padding:12px;min-height:calc(var(--vvh) - var(--header-h));display:flex;flex-direction:column}
 .chat-header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;padding:6px 0;background:linear-gradient(to bottom, rgba(0,0,0,.28), rgba(0,0,0,0));backdrop-filter:blur(4px)}
 .chat-header .grow{flex:1}
-.chat-log{list-style:none;margin:0;padding:8px 0 12px;display:flex;flex-direction:column;gap:10px;flex:1 1 auto;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;scroll-padding-bottom:96px}
+.chat-log{list-style:none;margin:0;padding:8px 0 12px;display:flex;flex-direction:column;gap:10px;flex:1 1 auto;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;scroll-padding-bottom:110px}
 /* centered rail */
 #chat-rail{min-height:0;display:flex;flex-direction:column;overflow:hidden;width:100%;max-width:min(var(--rail-max),100%);margin-inline:auto;padding-inline:var(--gap-sm)}
 /* Page-level viewport lock just for the chat page */
@@ -283,6 +291,17 @@ input:focus-visible, textarea:focus-visible, .btn:focus-visible, a:focus-visible
 .msg .text{white-space:pre-wrap;word-break:break-word}
 .msg pre{background:rgba(255,255,255,.04);border:1px solid var(--line);padding:12px;border-radius:12px;overflow:auto}
 .msg code,.msg pre code{font:400 .94rem/1.45 var(--pn-font-mono,ui-monospace,SFMono-Regular,Menlo,Consolas,monospace)}
+/* Markdown elements inside message bubbles */
+.msg :where(h1,h2,h3){ font-weight:700; line-height:1.25; margin-block:.6em .35em; }
+.msg h1{ font-size: clamp(1.25rem, 1.1rem + 1vw, 1.6rem); }
+.msg h2{ font-size: clamp(1.15rem, 1.05rem + .8vw, 1.45rem); }
+.msg h3{ font-size: clamp(1.07rem, 1rem + .6vw, 1.25rem); }
+.msg p{ margin-block:.6em; }
+.msg ul{ list-style: disc; padding-left: 1.25rem; margin-block:.6em; }
+.msg ol{ list-style: decimal; padding-left: 1.25rem; margin-block:.6em; }
+.msg blockquote{ border-left:3px solid color-mix(in oklab, var(--brand,#1f6feb), white 20%); padding-left:.9rem; margin:.8rem 0; color: var(--muted); }
+.msg pre{ background: rgba(5,9,20,.9); color:#E6EDF3; border:1px solid #243046; }
+.msg code{ background:rgba(5,9,20,.55); color:#E6EDF3; padding:.1rem .35rem; border-radius:6px; }
 .icon-btn{display:inline-grid;place-items:center;width:clamp(40px,36px + 1vw,44px);height:clamp(40px,36px + 1vw,44px);border:1px solid var(--line);border-radius:10px;background:transparent;opacity:.9;color:inherit}
 .icon-btn:hover,.icon-btn:focus-visible{opacity:1;outline:2px solid var(--brand);outline-offset:2px}
 .icon-img{width:18px;height:18px;display:block;pointer-events:none}
@@ -295,7 +314,7 @@ input:focus-visible, textarea:focus-visible, .btn:focus-visible, a:focus-visible
 .btn--spin{position:relative;color:transparent}
 .btn--spin::after{content:"";position:absolute;inset:0;margin:auto;width:1rem;height:1rem;border:.18rem solid rgba(255,255,255,.3);border-top-color:currentColor;border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.to-bottom{position:sticky;bottom:110px;margin-left:auto;z-index:5}
+.to-bottom{position:sticky;bottom:115px;margin-left:auto;z-index:5}
 .chat-alert{min-height:1.2rem;color:var(--muted);font-size:.9rem}
 .chip-list{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0;padding:0;list-style:none}
 .chip{border:1px solid var(--line);border-radius:999px;padding:.35rem .7rem;background:transparent;color:var(--ink)}

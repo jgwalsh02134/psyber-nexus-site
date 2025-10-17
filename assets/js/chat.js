@@ -303,6 +303,9 @@ function renderMarkdownSafe(mdText){
     const src = String(mdText || '');
     const markedLib = globalThis.marked;
     const purifier = globalThis.DOMPurify;
+    if (markedLib && typeof markedLib.setOptions === 'function') {
+      try { markedLib.setOptions({ breaks: true, smartypants: true }); } catch { /* noop */ }
+    }
     const dirty = (markedLib && typeof markedLib.parse === 'function') ? markedLib.parse(src) : src;
     if (purifier && typeof purifier.sanitize === 'function'){
       return purifier.sanitize(dirty, { USE_PROFILES: { html: true } });
