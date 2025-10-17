@@ -12,13 +12,20 @@
   <link rel="stylesheet" href="/assets/css/site.css">
 </head>
 <body>
-  <a class="skip" href="#main">Skip to main content</a>
+  <a class="sr-only sr-only-focusable" href="#main">Skip to content</a>
 
   <header class="header" role="banner">
-    <div class="wrap" style="justify-content: space-between; display:flex; align-items:center; gap:12px;">
-      <a class="logo" href="/">Psyber Nexus</a>
-      <nav aria-label="Utility">
-        <a class="btn ghost" href="/">Back to Home</a>
+    <div class="wrap">
+      <div class="brand"><a class="logo" href="/">Psyber Nexus</a></div>
+      <button id="nav-toggle" class="btn ghost nav-toggle" aria-expanded="false" aria-controls="primary-nav">Menu</button>
+      <nav id="primary-nav" class="nav" aria-label="Primary">
+        <ul class="nav-list">
+          <li><a href="/about/">About</a></li>
+          <li><a href="/methods/">Methods</a></li>
+          <li><a aria-current="page" href="/chat/">Chat</a></li>
+          <li><a href="/contact/">Contact</a></li>
+          <li><a href="/api/health">Status</a></li>
+        </ul>
       </nav>
     </div>
   </header>

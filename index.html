@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="/assets/css/site.css">
 </head>
 <body>
-  <a class="skip" href="#main">Skip to main content</a>
+  <a class="sr-only sr-only-focusable" href="#main">Skip to content</a>
 
   <header id="site-header" class="header" role="banner">
     <div class="wrap">
@@ -26,9 +26,9 @@
         <ul class="nav-list">
           <li><a href="/about/">About</a></li>
           <li><a href="/methods/">Methods</a></li>
+          <li><a href="/chat/">Chat</a></li>
           <li><a href="/contact/">Contact</a></li>
-          <li><a href="/api/health">API Health</a></li>
-          <li><a href="#console">Open AI Console</a></li>
+          <li><a href="/api/health">Status</a></li>
         </ul>
       </nav>
     </div>
@@ -44,8 +44,8 @@
         </p>
         <div class="actions">
           <a class="btn" href="/about/">About</a>
-          <a class="btn" href="#console">Open AI Console</a>
-          <a class="btn ghost" href="/api/health">API Health</a>
+          <a class="btn" href="/chat/">Open Chat</a>
+          <a class="btn ghost" href="/api/health">Status</a>
         </div>
       </div>
     </section>
@@ -91,24 +91,7 @@
       </div>
     </section>
 
-    <section id="console" class="console">
-      <div class="wrap">
-        <h2>Open AI Console</h2>
-        <p class="muted">Ask a question. Responses stream live from the proxy at <code>/api/chat</code>.</p>
-        <form id="ai-form" class="stack" novalidate>
-          <label for="ai-input" class="visually-hidden">Your prompt</label>
-          <textarea id="ai-input" name="prompt" rows="4" required placeholder="Ask anything about psychology, cybersecurity, or Psyber Nexus..."></textarea>
-          <div class="row">
-            <button id="ai-send" class="btn" type="submit">Send</button>
-            <button id="ai-stop" class="btn ghost" type="button" disabled>Stop</button>
-            <span id="ai-status" class="spinner" aria-hidden="true" hidden></span>
-          </div>
-        </form>
-        <div class="panel">
-          <pre id="ai-output" class="output" role="region" aria-live="polite"></pre>
-        </div>
-      </div>
-    </section>
+    
   </main>
 
   <footer class="footer" role="contentinfo">

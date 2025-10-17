@@ -1,4 +1,4 @@
-const $ = (sel, ctx = document) => ctx.querySelector(sel);
+const $ = (sel, ctx = globalThis.document) => ctx.querySelector(sel);
 
 const state = { aborter: null };
 
@@ -13,8 +13,8 @@ function toast(msg, kind = "info", timeout = 4000) {
   el.textContent = msg;
   el.setAttribute("data-kind", kind);
   el.classList.add("show");
-  window.clearTimeout(el._t);
-  el._t = window.setTimeout(() => el.classList.remove("show"), timeout);
+  globalThis.clearTimeout(el._t);
+  el._t = globalThis.setTimeout(() => el.classList.remove("show"), timeout);
 }
 
 function focusables(container) {
@@ -31,26 +31,30 @@ function navSetup() {
   let lastFocus = null;
 
   function openNav() {
-    document.body.setAttribute("data-nav-open", "true");
+    globalThis.document.body.setAttribute("data-nav-open", "true");
     toggle.setAttribute("aria-expanded", "true");
-    lastFocus = document.activeElement;
+    lastFocus = globalThis.document.activeElement;
     const first = focusables(nav)[0];
     first && first.focus();
   }
 
   function closeNav() {
-    document.body.removeAttribute("data-nav-open");
+    globalThis.document.body.removeAttribute("data-nav-open");
     toggle.setAttribute("aria-expanded", "false");
-    toggle.focus();
+    if (lastFocus && typeof lastFocus.focus === 'function') {
+      lastFocus.focus();
+    } else {
+      toggle.focus();
+    }
   }
 
   toggle.addEventListener("click", () => {
-    const open = document.body.getAttribute("data-nav-open") === "true";
+    const open = globalThis.document.body.getAttribute("data-nav-open") === "true";
     open ? closeNav() : openNav();
   });
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && document.body.getAttribute("data-nav-open") === "true") {
+  globalThis.document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && globalThis.document.body.getAttribute("data-nav-open") === "true") {
       e.preventDefault();
       closeNav();
     }
@@ -62,23 +66,40 @@ function navSetup() {
     if (nodes.length === 0) return;
     const first = nodes[0];
     const last = nodes[nodes.length - 1];
-    if (e.shiftKey && document.activeElement === first) {
+    if (e.shiftKey && globalThis.document.activeElement === first) {
       e.preventDefault();
       last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
+    } else if (!e.shiftKey && globalThis.document.activeElement === last) {
       e.preventDefault();
       first.focus();
     }
   });
 }
 
+function setActiveNav() {
+  const nav = globalThis.document.getElementById('primary-nav');
+  if (!nav) return;
+  const norm = (p) => (p || '/').replace(/\/+$/, '/') ;
+  const here = norm(globalThis.location?.pathname || '/');
+  const links = nav.querySelectorAll('a[href]');
+  links.forEach((a) => {
+    try {
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto:')) return;
+      let ap = a.pathname || new globalThis.URL(href, globalThis.location.origin).pathname;
+      ap = norm(ap);
+      if (ap === here) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    } catch (_) { /* ignore */ }
+  });
+}
+
 function scrollSetup() {
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  document.addEventListener('click', (e) => {
+  const reduce = !!globalThis.matchMedia && globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  globalThis.document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href^="#"]');
     if (!a) return;
     const id = decodeURIComponent(a.getAttribute('href').slice(1));
-    const target = document.getElementById(id);
+    const target = globalThis.document.getElementById(id);
     if (!target) return;
     e.preventDefault();
     if (!reduce) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -98,8 +119,8 @@ async function streamChat(text) {
     send?.setAttribute('disabled', 'true');
     stop?.removeAttribute('disabled');
 
-    state.aborter = new AbortController();
-    const res = await fetch('/api/chat', {
+    state.aborter = new globalThis.AbortController();
+    const res = await globalThis.fetch('/api/chat', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ messages: [{ role: 'user', content: text }] }),
@@ -111,7 +132,7 @@ async function streamChat(text) {
     }
 
     const reader = res.body.getReader();
-    const decoder = new TextDecoder();
+    const decoder = new globalThis.TextDecoder();
     let buffer = '';
     let done = false;
 
@@ -165,13 +186,13 @@ function consoleSetup() {
 }
 
 function contactSetup() {
-  const form = document.getElementById('contact-form');
+  const form = globalThis.document.getElementById('contact-form');
   if (!form) return;
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     try {
-      const fd = new FormData(form);
-      const res = await fetch('/api/contact', { method: 'POST', body: fd });
+      const fd = new globalThis.FormData(form);
+      const res = await globalThis.fetch('/api/contact', { method: 'POST', body: fd });
       if (res.ok) {
         toast('Message sent. Thank you!');
         form.reset();
@@ -187,9 +208,10 @@ function contactSetup() {
 function init() {
   setYear();
   navSetup();
+  setActiveNav();
   scrollSetup();
   consoleSetup();
   contactSetup();
 }
 
-document.addEventListener('DOMContentLoaded', init);
+globalThis.document.addEventListener('DOMContentLoaded', init);
