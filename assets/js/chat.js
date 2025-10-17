@@ -79,7 +79,14 @@ function renderItem(role, text, timeStr = ts()) {
 
 function renderHistory(saved) {
   els.log.innerHTML = '';
-  for (const m of saved) renderItem(m.role, m.content);
+  for (const m of saved) {
+    if (m.role === 'assistant' && typeof m.html === 'string' && m.html) {
+      const { contentEl } = renderItem(m.role, '');
+      contentEl.innerHTML = m.html;
+    } else {
+      renderItem(m.role, m.content);
+    }
+  }
 }
 
 function setUIBusy(busy) {
@@ -180,7 +187,8 @@ async function streamTo(el, onDone) {
                 if (delta) {
                   assistantMd += delta;
                   assistantPlain = stripMarkdown(assistantMd);
-                  el.textContent = assistantPlain;
+                  const html = renderMarkdownSafe(assistantMd);
+                  el.innerHTML = html;
                   if (shouldStick && logEl) scrollToBottom(logEl);
                 }
               }
@@ -191,7 +199,8 @@ async function streamTo(el, onDone) {
             if (token) {
               assistantMd += token;
               assistantPlain = stripMarkdown(assistantMd);
-              el.textContent = assistantPlain;
+              const html = renderMarkdownSafe(assistantMd);
+              el.innerHTML = html;
               if (shouldStick && logEl) scrollToBottom(logEl);
             }
           } catch { /* noop */ }
@@ -233,7 +242,8 @@ function onSubmit(e) {
   shouldStick = true; // stick to bottom when sending a new message
   streamTo(contentEl, (finalPlain, finalMd) => {
     const finalText = finalPlain || contentEl.textContent || '';
-    messages.push({ role: 'assistant', content: finalText, md: finalMd });
+    const finalHtml = renderMarkdownSafe(finalMd || contentEl.textContent || '');
+    messages.push({ role: 'assistant', content: finalText, md: finalMd, html: finalHtml });
     saveMessages();
   });
 }
@@ -285,6 +295,20 @@ function stripMarkdown(md){
   // escaped punctuation (unescape common markdown/HTML punctuation)
   s = s.replace(/\\(\]|\[|\(|\)|>|#|\+|\.|!|-|\*|_|`|~)/g, '$1');
   return s;
+}
+
+// Markdown → safe HTML using Marked + DOMPurify loaded from CDN
+function renderMarkdownSafe(mdText){
+  try{
+    const src = String(mdText || '');
+    const markedLib = globalThis.marked;
+    const purifier = globalThis.DOMPurify;
+    const dirty = (markedLib && typeof markedLib.parse === 'function') ? markedLib.parse(src) : src;
+    if (purifier && typeof purifier.sanitize === 'function'){
+      return purifier.sanitize(dirty, { USE_PROFILES: { html: true } });
+    }
+    return dirty;
+  }catch{ return String(mdText || ''); }
 }
 
 // Toast-like inline status
