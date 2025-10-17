@@ -1,4 +1,4 @@
-export const onRequest: PagesFunction = async (ctx) => {
+export const onRequest = async (ctx: { request: Request; env: Record<string, unknown> }) => {
   const { request, env } = ctx;
 
   if (request.method !== "POST") {
