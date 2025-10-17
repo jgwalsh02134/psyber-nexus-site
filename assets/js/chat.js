@@ -1,5 +1,5 @@
 /* eslint-env browser */
-/* global document, sessionStorage, getComputedStyle, AbortController, fetch, TextDecoder */
+/* global document, sessionStorage, getComputedStyle, AbortController, fetch, TextDecoder, navigator */
 // Chat client for Psyber Nexus
 // Streams SSE from /api/chat via Cloudflare Pages Function
 
@@ -16,10 +16,14 @@ const els = {
   send: $("#send-btn"),
   stop: $("#stop-btn"),
   alert: $("#chat-alert"),
+  copyThread: $("#copy-thread"),
+  shareThread: $("#share-thread"),
+  toBottom: $("#to-bottom"),
 };
 
 let controller = null; // AbortController
 let streaming = false;
+let autoScroll = true;
 
 // Messages that go to the API
 let messages = [{ role: "system", content: SYS_PROMPT }];
@@ -56,10 +60,21 @@ function renderItem(role, text, timeStr = ts()) {
   const content = document.createElement('div');
   content.className = 'content';
   content.textContent = text;
+  const actions = document.createElement('div');
+  actions.className = 'msg-actions';
+  actions.innerHTML = `
+    <button class="icon-btn copy-md" aria-label="Copy as Markdown" title="Copy as Markdown">
+      <img class="icon-img" src="/assets/icons/copy.svg" alt="" loading="lazy" decoding="async">
+    </button>
+    <button class="icon-btn share-msg" aria-label="Share message" title="Share">
+      <img class="icon-img" src="/assets/icons/share.svg" alt="" loading="lazy" decoding="async">
+    </button>
+  `;
   li.appendChild(meta);
   li.appendChild(content);
+  li.appendChild(actions);
   els.log?.appendChild(li);
-  li.scrollIntoView({ block: 'end' });
+  if (autoScroll) li.scrollIntoView({ block: 'end' });
   return { li, contentEl: content };
 }
 
@@ -71,9 +86,14 @@ function renderHistory(saved) {
 function setUIBusy(busy) {
   streaming = busy;
   if (busy) {
+    if (els.send && !els.send.dataset.label) els.send.dataset.label = els.send.textContent || 'Send';
+    els.send?.classList.add('btn--spin');
+    if (els.send) els.send.textContent = '';
     els.send?.setAttribute('disabled', '');
     els.stop?.removeAttribute('hidden');
   } else {
+    if (els.send && els.send.dataset.label != null) els.send.textContent = els.send.dataset.label;
+    els.send?.classList.remove('btn--spin');
     els.send?.removeAttribute('disabled');
     els.stop?.setAttribute('hidden', '');
   }
@@ -104,6 +124,7 @@ async function streamTo(el, onDone) {
   try {
     setUIBusy(true);
     els.alert.textContent = '';
+    autoScroll = atBottom();
 
     const res = await fetch('/api/chat', {
       method: 'POST',
@@ -136,7 +157,10 @@ async function streamTo(el, onDone) {
           try {
             const json = JSON.parse(data);
             const token = json.choices?.[0]?.delta?.content ?? json.choices?.[0]?.text ?? '';
-            if (token) el.textContent += token;
+            if (token) {
+              el.textContent += token;
+              if (autoScroll) el.parentElement?.scrollIntoView({ block: 'end' });
+            }
           } catch { /* noop */ }
         }
       }
@@ -191,6 +215,42 @@ function stopStreaming() {
   if (controller) controller.abort();
 }
 
+// Markdown helpers
+function msgToMarkdown(m){ return `**${m.role==='user'?'You':'Psyber Nexus'}:** ${m.content}`; }
+function threadToMarkdown(list){ return list.filter(x=>x.role!=='system').map(msgToMarkdown).join('\n\n'); }
+
+// Toast-like inline status
+function toast(msg, timeout=1500){
+  if (!els.alert) return;
+  els.alert.textContent = msg;
+  globalThis.setTimeout(() => { if (els.alert.textContent === msg) els.alert.textContent = ''; }, timeout);
+}
+
+// Clipboard helper with fallback
+async function copyText(text){
+  try{ await navigator.clipboard.writeText(text); toast('Copied'); }
+  catch(e){
+    try{ const t=globalThis.document.createElement('textarea'); t.value=text; globalThis.document.body.appendChild(t); t.select(); globalThis.document.execCommand('copy'); t.remove(); toast('Copied'); }
+    catch(err){ void err; }
+  }
+}
+
+// Web Share helper with fallback to copy
+async function shareText(text){
+  if (navigator.share){ try{ await navigator.share({ text, url: globalThis.location.href, title:'Psyber Nexus Chat' }); return; }catch(e){ void e; } }
+  await copyText(text);
+}
+
+// Scroll helpers
+function atBottom(){
+  const near = Math.abs(((globalThis.innerHeight || 0) + (globalThis.scrollY || 0)) - document.documentElement.scrollHeight) < 80;
+  return near;
+}
+function updateToBottom(){
+  const show = !atBottom();
+  if (els.toBottom) els.toBottom.hidden = !show;
+}
+
 function init() {
   const saved = loadSaved();
   messages = [{ role: 'system', content: SYS_PROMPT }, ...saved];
@@ -203,6 +263,33 @@ function init() {
 
   attachChips();
   growTextarea();
+
+  // Per-message delegated actions
+  els.log?.addEventListener('click', async (e) => {
+    const copyBtn = e.target.closest('.copy-md');
+    const shareBtn = e.target.closest('.share-msg');
+    if (!copyBtn && !shareBtn) return;
+    const li = e.target.closest('.msg');
+    if (!li) return;
+    const role = li.classList.contains('user') ? 'user' : 'assistant';
+    const text = li.querySelector('.content')?.textContent || '';
+    const md = msgToMarkdown({ role, content: text });
+    if (copyBtn) await copyText(md);
+    if (shareBtn) await shareText(md);
+  });
+
+  // Thread actions
+  els.copyThread?.addEventListener('click', async () => { await copyText(threadToMarkdown(messages)); });
+  els.shareThread?.addEventListener('click', async () => { await shareText(threadToMarkdown(messages)); });
+
+  // Scroll to bottom controls
+  globalThis.addEventListener('scroll', updateToBottom, { passive: true });
+  els.toBottom?.addEventListener('click', () => {
+    const last = els.log?.lastElementChild;
+    last?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    updateToBottom();
+  });
+  updateToBottom();
 }
 
 document.addEventListener('DOMContentLoaded', init);

@@ -25,7 +25,7 @@ function focusables(container) {
 
 function navSetup() {
   const toggle = $("#nav-toggle");
-  const nav = $("#primary-nav");
+  const nav = $("#site-nav");
   if (!toggle || !nav) return;
 
   let lastFocus = null;
@@ -74,10 +74,16 @@ function navSetup() {
       first.focus();
     }
   });
+  // Close on link click
+  nav.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href]');
+    if (!a) return;
+    closeNav();
+  });
 }
 
 function setActiveNav() {
-  const nav = globalThis.document.getElementById('primary-nav');
+  const nav = globalThis.document.getElementById('site-nav');
   if (!nav) return;
   const norm = (p) => (p || '/').replace(/\/+$/, '/') ;
   const here = norm(globalThis.location?.pathname || '/');
