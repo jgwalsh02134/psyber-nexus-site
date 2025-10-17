@@ -34,6 +34,11 @@
     <section class="chat-panel" aria-label="Conversation">
       <div class="chat-header wrap" role="toolbar" aria-label="Conversation actions">
         <div class="grow"></div>
+        <select id="mode-select" class="mode-pill" aria-label="Mode">
+          <option value="quality" selected>Quality</option>
+          <option value="speed">Speed</option>
+        </select>
+        <span id="model-pill" class="model-pill" title="Model in use"></span>
         <button id="copy-thread" class="icon-btn" aria-label="Copy conversation as Markdown" title="Copy thread">
           <img class="icon-img" src="/assets/icons/copy.svg" alt="" loading="lazy" decoding="async">
         </button>

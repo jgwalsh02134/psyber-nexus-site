@@ -127,12 +127,23 @@ async function streamTo(el, onDone) {
     const logEl = document.getElementById('chat-log');
     if (logEl) shouldStick = isNearBottom(logEl);
 
+    // mode selection for speed vs quality
+    const modeSel = document.getElementById('mode-select');
+    const fast = modeSel ? (modeSel.value === 'speed') : false;
+
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages }),
+      body: JSON.stringify({ messages, ...(fast ? { fast: true } : {}) }),
       signal: controller.signal,
     });
+
+    // surface actual model used
+    try {
+      const modelPill = document.getElementById('model-pill');
+      const used = res?.headers?.get('x-psyber-model');
+      if (modelPill && used) modelPill.textContent = used;
+    } catch { /* noop */ }
 
     if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
 
