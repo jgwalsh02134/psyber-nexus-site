@@ -1,0 +1,3 @@
+Contact: mailto:security@psyber.nexus
+Policy: https://jgwalsh.com/projects/psyber-nexus/
+Preferred-Languages: en

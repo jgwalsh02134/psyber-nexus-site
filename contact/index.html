@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <title>Contact · Psyber Nexus</title>
+  <meta name="description" content="Contact Psyber Nexus.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d12">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/assets/css/site.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to main content</a>
+
+  <header class="header" role="banner">
+    <div class="wrap">
+      <div class="brand"><a class="logo" href="/">Psyber Nexus</a></div>
+      <button id="nav-toggle" class="btn ghost nav-toggle" aria-expanded="false" aria-controls="primary-nav">Menu</button>
+      <nav id="primary-nav" class="nav" aria-label="Primary">
+        <ul class="nav-list">
+          <li><a href="/about/">About</a></li>
+          <li><a href="/methods/">Methods</a></li>
+          <li><a aria-current="page" href="/contact/">Contact</a></li>
+          <li><a href="/api/health">API Health</a></li>
+          <li><a href="/#console">Open AI Console</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1" class="wrap">
+    <h1>Contact</h1>
+    <p class="lede">Send us a note. We’ll get back soon.</p>
+
+    <form id="contact-form" class="stack" method="post" action="/api/contact" novalidate>
+      <div class="field">
+        <label for="name">Name</label>
+        <input id="name" name="name" autocomplete="name" required>
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" inputmode="email" autocomplete="email" required>
+      </div>
+      <div class="field">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="5" required></textarea>
+      </div>
+
+      <div id="cf-turnstile" class="field" aria-hidden="true"></div>
+
+      <div class="row">
+        <button class="btn" type="submit">Send</button>
+        <button class="btn ghost" type="reset">Reset</button>
+      </div>
+    </form>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <div class="wrap">
+      <p>&copy; <span id="year"></span> Psyber Nexus</p>
+      <nav aria-label="Footer">
+        <a href="/about/">About</a>
+        <a href="/methods/">Methods</a>
+        <a aria-current="page" href="/contact/">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <div id="toast" aria-live="polite" aria-atomic="true"></div>
+  <script src="/assets/js/app.js" type="module"></script>
+</body>
+</html>

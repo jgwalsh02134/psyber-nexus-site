@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <title>Psyber Nexus</title>
+  <meta name="description" content="Psyber Nexus merges psychology with cybersecurity to enhance digital protection while addressing the human element of cyber threats.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d12">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/assets/css/site.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to main content</a>
+
+  <header id="site-header" class="header" role="banner">
+    <div class="wrap">
+      <div class="brand">
+        <a href="/" class="logo" aria-label="Psyber Nexus Home">Psyber Nexus</a>
+      </div>
+      <button id="nav-toggle" class="btn ghost nav-toggle" aria-expanded="false" aria-controls="primary-nav" aria-label="Open navigation">
+        Menu
+      </button>
+      <nav id="primary-nav" class="nav" aria-label="Primary">
+        <ul class="nav-list">
+          <li><a href="/about/">About</a></li>
+          <li><a href="/methods/">Methods</a></li>
+          <li><a href="/contact/">Contact</a></li>
+          <li><a href="/api/health">API Health</a></li>
+          <li><a href="#console">Open AI Console</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section class="hero">
+      <div class="wrap">
+        <p class="kicker">Where Minds Meet Machines</p>
+        <h1>WELCOME TO PSYBER NEXUS</h1>
+        <p class="lede">
+          At Psyber Nexus, we merge psychology with cybersecurity, creating innovative solutions that enhance digital protection while addressing the human element of cyber threats.
+        </p>
+        <div class="actions">
+          <a class="btn" href="/about/">About</a>
+          <a class="btn" href="#console">Open AI Console</a>
+          <a class="btn ghost" href="/api/health">API Health</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="features">
+      <div class="wrap">
+        <div class="grid">
+          <article class="card">
+            <h3>Cybersecurity Through Psychology</h3>
+            <ul>
+              <li>Offensive: anticipate adversary behavior</li>
+              <li>Defensive: design human-centered safeguards</li>
+              <li>Integration: embed psyche-informed controls</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Misinformation Mitigation</h3>
+            <ul>
+              <li>Understanding: map cognitive vectors of deception</li>
+              <li>Tools: Deepfake Dashboard™ and Cyber HUMINT</li>
+              <li>Strategy: detect, deter, and inoculate</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Incident Response with a Human Touch</h3>
+            <ul>
+              <li>Response: calm, coordinated communications</li>
+              <li>Framework: human-ready playbooks and drills</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Education and Awareness</h3>
+            <ul>
+              <li>Workshops: practical, scenario-based training</li>
+              <li>Awareness: bias and social-engineering literacy</li>
+              <li>Innovative learning: adaptive and interactive</li>
+            </ul>
+          </article>
+        </div>
+        <div class="cta-more">
+          <a class="btn ghost" href="/methods/">Explore Methods</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="console" class="console">
+      <div class="wrap">
+        <h2>Open AI Console</h2>
+        <p class="muted">Ask a question. Responses stream live from the proxy at <code>/api/chat</code>.</p>
+        <form id="ai-form" class="stack" novalidate>
+          <label for="ai-input" class="visually-hidden">Your prompt</label>
+          <textarea id="ai-input" name="prompt" rows="4" required placeholder="Ask anything about psychology, cybersecurity, or Psyber Nexus..."></textarea>
+          <div class="row">
+            <button id="ai-send" class="btn" type="submit">Send</button>
+            <button id="ai-stop" class="btn ghost" type="button" disabled>Stop</button>
+            <span id="ai-status" class="spinner" aria-hidden="true" hidden></span>
+          </div>
+        </form>
+        <div class="panel">
+          <pre id="ai-output" class="output" role="region" aria-live="polite"></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <div class="wrap">
+      <p>&copy; <span id="year"></span> Psyber Nexus</p>
+      <nav aria-label="Footer">
+        <a href="/about/">About</a>
+        <a href="/methods/">Methods</a>
+        <a href="/contact/">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <div id="toast" aria-live="polite" aria-atomic="true"></div>
+
+  <noscript><div class="noscript">For the AI console and enhanced navigation, please enable JavaScript.</div></noscript>
+  <script src="/assets/js/app.js" type="module"></script>
+</body>
+</html>

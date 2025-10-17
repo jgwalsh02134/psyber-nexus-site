@@ -1,0 +1,195 @@
+const $ = (sel, ctx = document) => ctx.querySelector(sel);
+
+const state = { aborter: null };
+
+function setYear() {
+  const y = $("#year");
+  if (y) y.textContent = String(new Date().getFullYear());
+}
+
+function toast(msg, kind = "info", timeout = 4000) {
+  const el = $("#toast");
+  if (!el) return;
+  el.textContent = msg;
+  el.setAttribute("data-kind", kind);
+  el.classList.add("show");
+  window.clearTimeout(el._t);
+  el._t = window.setTimeout(() => el.classList.remove("show"), timeout);
+}
+
+function focusables(container) {
+  return Array.from(container.querySelectorAll(
+    'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])'
+  )).filter(el => !el.hasAttribute('disabled'));
+}
+
+function navSetup() {
+  const toggle = $("#nav-toggle");
+  const nav = $("#primary-nav");
+  if (!toggle || !nav) return;
+
+  let lastFocus = null;
+
+  function openNav() {
+    document.body.setAttribute("data-nav-open", "true");
+    toggle.setAttribute("aria-expanded", "true");
+    lastFocus = document.activeElement;
+    const first = focusables(nav)[0];
+    first && first.focus();
+  }
+
+  function closeNav() {
+    document.body.removeAttribute("data-nav-open");
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.focus();
+  }
+
+  toggle.addEventListener("click", () => {
+    const open = document.body.getAttribute("data-nav-open") === "true";
+    open ? closeNav() : openNav();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && document.body.getAttribute("data-nav-open") === "true") {
+      e.preventDefault();
+      closeNav();
+    }
+  });
+
+  nav.addEventListener("keydown", (e) => {
+    if (e.key !== "Tab") return;
+    const nodes = focusables(nav);
+    if (nodes.length === 0) return;
+    const first = nodes[0];
+    const last = nodes[nodes.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+}
+
+function scrollSetup() {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const id = decodeURIComponent(a.getAttribute('href').slice(1));
+    const target = document.getElementById(id);
+    if (!target) return;
+    e.preventDefault();
+    if (!reduce) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    else target.scrollIntoView();
+  });
+}
+
+async function streamChat(text) {
+  const output = $("#ai-output");
+  const status = $("#ai-status");
+  const send = $("#ai-send");
+  const stop = $("#ai-stop");
+  try {
+    if (!output) return;
+    output.textContent = "";
+    status?.removeAttribute('hidden');
+    send?.setAttribute('disabled', 'true');
+    stop?.removeAttribute('disabled');
+
+    state.aborter = new AbortController();
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ messages: [{ role: 'user', content: text }] }),
+      signal: state.aborter.signal
+    });
+
+    if (!res.ok || !res.body) {
+      throw new Error(`Request failed: ${res.status}`);
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let done = false;
+
+    while (!done) {
+      const { value, done: doneChunk } = await reader.read();
+      done = doneChunk;
+      if (value) {
+        buffer += decoder.decode(value, { stream: true });
+        let idx;
+        while ((idx = buffer.indexOf('\n\n')) !== -1) {
+          const evt = buffer.slice(0, idx).trim();
+          buffer = buffer.slice(idx + 2);
+          if (!evt) continue;
+          const line = evt.split('\n').find(l => l.startsWith('data:')) || '';
+          const data = line.replace(/^data:\s?/, '').trim();
+          if (!data) continue;
+          if (data === '[DONE]') { done = true; break; }
+          try {
+            const json = JSON.parse(data);
+            const token = json.choices?.[0]?.delta?.content ?? json.choices?.[0]?.text ?? '';
+            if (token) output.textContent += token;
+          } catch (_) { /* ignore parse errors */ }
+        }
+      }
+    }
+  } catch (err) {
+    toast(`Error: ${err.message || err}` , 'error');
+  } finally {
+    status?.setAttribute('hidden', '');
+    send?.removeAttribute('disabled');
+    stop?.setAttribute('disabled', '');
+    state.aborter = null;
+  }
+}
+
+function consoleSetup() {
+  const form = $("#ai-form");
+  const input = $("#ai-input");
+  const stop = $("#ai-stop");
+  if (!form || !input) return;
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) { toast('Please enter a prompt', 'warn'); return; }
+    streamChat(text);
+  });
+  stop?.addEventListener('click', () => {
+    if (state.aborter) state.aborter.abort();
+  });
+}
+
+function contactSetup() {
+  const form = document.getElementById('contact-form');
+  if (!form) return;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+      const fd = new FormData(form);
+      const res = await fetch('/api/contact', { method: 'POST', body: fd });
+      if (res.ok) {
+        toast('Message sent. Thank you!');
+        form.reset();
+      } else {
+        toast('Contact endpoint is not available yet.', 'warn');
+      }
+    } catch (err) {
+      toast('Network error while sending message.', 'error');
+    }
+  });
+}
+
+function init() {
+  setYear();
+  navSetup();
+  scrollSetup();
+  consoleSetup();
+  contactSetup();
+}
+
+document.addEventListener('DOMContentLoaded', init);
