@@ -16,7 +16,7 @@
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js" crossorigin="anonymous"></script>
 </head>
 <body class="page">
-  <a class="sr-only sr-only-focusable" href="#main">Skip to content</a>
+  <a class="sr-only sr-only-focusable" href="#chat-shell">Skip to content</a>
 
   <header class="header" role="banner">
     <div class="wrap">
@@ -34,7 +34,7 @@
     </div>
   </header>
 
-  <main id="main" class="wrap chat-shell" tabindex="-1">
+  <main id="chat-shell" class="wrap chat-shell" tabindex="-1">
     <section id="chat-panel" class="chat-panel" aria-label="Conversation">
       <div class="chat-header wrap" role="toolbar" aria-label="Conversation actions">
         <div class="grow"></div>
@@ -62,7 +62,7 @@
         <div id="chat-alert" class="chat-alert" role="status" aria-live="polite"></div>
       </form>
     </section>
-    <aside class="chat-help" aria-label="Shortcuts">
+    <aside id="chat-help" class="chat-help" aria-label="Shortcuts and tips">
       <h2 class="h4">Tips</h2>
       <ul class="chip-list">
         <li><button class="chip" data-fill="Summarize the Psyber Nexus concept.">Concept summary</button></li>
