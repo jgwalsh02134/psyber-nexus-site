@@ -17,78 +17,49 @@ function toast(msg, kind = "info", timeout = 4000) {
   el._t = globalThis.setTimeout(() => el.classList.remove("show"), timeout);
 }
 
-function focusables(container) {
-  return Array.from(container.querySelectorAll(
-    'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])'
-  )).filter(el => !el.hasAttribute('disabled'));
-}
+// (focus trapping helper removed; overlay menu does not require it)
 
 function navSetup() {
-  const toggle = $("#nav-toggle");
-  const nav = $("#site-nav");
-  if (!toggle || !nav) return;
+  const root = globalThis.document.documentElement;
+  const btn = globalThis.document.getElementById('nav-toggle');
+  const overlay = globalThis.document.getElementById('nav-overlay');
+  const panel = overlay?.querySelector('.nav-panel');
+  const desktopNav = globalThis.document.getElementById('site-nav');
+  if (!btn || !overlay || !panel || !desktopNav) return;
 
-  let lastFocus = null;
-
-  function openNav() {
-    globalThis.document.body.setAttribute("data-nav-open", "true");
-    toggle.setAttribute("aria-expanded", "true");
-    lastFocus = globalThis.document.activeElement;
-    const first = focusables(nav)[0];
-    first && first.focus();
+  function setOpen(open) {
+    root.classList.toggle('nav-open', !!open);
+    btn.setAttribute('aria-expanded', String(!!open));
+    overlay.hidden = !open;
+    root.style.overflow = open ? 'hidden' : '';
+    if (open) { btn.focus(); }
   }
 
-  function closeNav() {
-    globalThis.document.body.removeAttribute("data-nav-open");
-    toggle.setAttribute("aria-expanded", "false");
-    if (lastFocus && typeof lastFocus.focus === 'function') {
-      lastFocus.focus();
-    } else {
-      toggle.focus();
-    }
-  }
-
-  toggle.addEventListener("click", () => {
-    const open = globalThis.document.body.getAttribute("data-nav-open") === "true";
-    open ? closeNav() : openNav();
+  btn.addEventListener('click', () => {
+    const open = btn.getAttribute('aria-expanded') !== 'true';
+    setOpen(open);
   });
 
-  globalThis.document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && globalThis.document.body.getAttribute("data-nav-open") === "true") {
-      e.preventDefault();
-      closeNav();
-    }
+  // Close when clicking outside the panel or on any link inside overlay
+  overlay.addEventListener('click', (e) => {
+    const within = e.target.closest('.nav-panel');
+    const link = e.target.closest('a');
+    if (!within || link) setOpen(false);
   });
 
-  nav.addEventListener("keydown", (e) => {
-    if (e.key !== "Tab") return;
-    const nodes = focusables(nav);
-    if (nodes.length === 0) return;
-    const first = nodes[0];
-    const last = nodes[nodes.length - 1];
-    if (e.shiftKey && globalThis.document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && globalThis.document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
-    }
-  });
-  // Close on link click
-  nav.addEventListener('click', (e) => {
-    const a = e.target.closest('a[href]');
-    if (!a) return;
-    closeNav();
-  });
+  // Close on Escape
+  globalThis.document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
 }
 
 function setActiveNav() {
   const nav = globalThis.document.getElementById('site-nav');
-  if (!nav) return;
-  const norm = (p) => (p || '/').replace(/\/+$/, '/') ;
+  const overlay = globalThis.document.getElementById('nav-overlay');
+  const panel = overlay?.querySelector('.nav-panel');
+  if (!nav || !panel) return;
+  const norm = (p) => (p || '/').replace(/\/+$/, '/');
   const here = norm(globalThis.location?.pathname || '/');
-  const links = nav.querySelectorAll('a[href]');
-  links.forEach((a) => {
+  const all = [...nav.querySelectorAll('a[href]'), ...panel.querySelectorAll('a[href]')];
+  all.forEach((a) => {
     try {
       const href = a.getAttribute('href');
       if (!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto:')) return;

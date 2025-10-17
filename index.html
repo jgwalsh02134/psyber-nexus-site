@@ -14,22 +14,32 @@
 <body class="page">
   <a class="sr-only sr-only-focusable" href="#main">Skip to content</a>
 
-  <header id="site-header" class="header" role="banner">
-    <div class="wrap">
-      <div class="brand">
-        <a href="/" class="logo" aria-label="Psyber Nexus Home">Psyber Nexus</a>
-      </div>
-      <button id="nav-toggle" class="btn ghost nav-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation">
-        Menu
+  <header class="site-header" role="banner">
+    <div class="wrap navbar">
+      <a class="brand" href="/">Psyber Nexus</a>
+
+      <button id="nav-toggle" class="hamburger" aria-controls="site-nav" aria-expanded="false" aria-label="Menu">
+        <span></span><span></span><span></span>
       </button>
-      <nav id="site-nav" class="nav" aria-label="Primary">
-        <ul class="nav-list">
-          <li><a href="/about/">About</a></li>
-          <li><a href="/methods/">Methods</a></li>
-          <li><a href="/chat/">Chat</a></li>
-          <li><a href="/contact/">Contact</a></li>
-          <li><a href="/api/health">Status</a></li>
-        </ul>
+
+      <!-- Desktop nav (visible ≥900px) -->
+      <nav id="site-nav" class="nav nav-inline" aria-label="Primary">
+        <a href="/about/">About</a>
+        <a href="/methods/">Methods</a>
+        <a href="/chat/">Chat</a>
+        <a href="/contact/">Contact</a>
+        <a href="/api/health">Status</a>
+      </nav>
+    </div>
+
+    <!-- Mobile overlay menu -->
+    <div id="nav-overlay" class="nav-overlay" hidden>
+      <nav class="nav-panel" aria-label="Primary">
+        <a href="/about/">About</a>
+        <a href="/methods/">Methods</a>
+        <a href="/chat/">Chat</a>
+        <a href="/contact/">Contact</a>
+        <a href="/api/health">Status</a>
       </nav>
     </div>
   </header>
