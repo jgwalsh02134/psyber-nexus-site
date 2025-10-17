@@ -12,13 +12,13 @@
   <link rel="stylesheet" href="/assets/css/site.css">
 </head>
 <body>
-  <a class="sr-only sr-only-focusable" href="#main">Skip to content</a>
+  <a class="sr-only sr-only-focusable" href="#site-nav">Skip to navigation</a>
 
   <header class="header" role="banner">
     <div class="wrap">
       <div class="brand"><a class="logo" href="/">Psyber Nexus</a></div>
-      <button id="nav-toggle" class="btn ghost nav-toggle" aria-expanded="false" aria-controls="primary-nav">Menu</button>
-      <nav id="primary-nav" class="nav" aria-label="Primary">
+      <button id="nav-toggle" class="btn ghost nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>
+      <nav id="site-nav" class="nav" aria-label="Primary">
         <ul class="nav-list">
           <li><a href="/about/">About</a></li>
           <li><a href="/methods/">Methods</a></li>
@@ -32,7 +32,16 @@
 
   <main id="main" class="wrap chat-shell" tabindex="-1">
     <section class="chat-panel" aria-label="Conversation">
+      <div class="chat-toolbar" role="group" aria-label="Conversation tools">
+        <button id="copy-thread" class="icon-btn" aria-label="Copy conversation as Markdown" title="Copy thread">
+          <img class="icon-img" src="/assets/icons/copy.svg" alt="" loading="lazy" decoding="async">
+        </button>
+        <button id="share-thread" class="icon-btn" aria-label="Share conversation" title="Share">
+          <img class="icon-img" src="/assets/icons/share.svg" alt="" loading="lazy" decoding="async">
+        </button>
+      </div>
       <ol id="chat-log" class="chat-log" aria-live="polite" aria-relevant="additions"></ol>
+      <button id="to-bottom" class="icon-btn to-bottom" aria-label="Scroll to bottom" title="Scroll to bottom" hidden>↓</button>
       <form id="chat-form" class="chat-form" novalidate>
         <label class="sr-only" for="chat-input">Message</label>
         <textarea id="chat-input" rows="1" placeholder="Ask Psyber Nexus…" autocomplete="off"></textarea>
