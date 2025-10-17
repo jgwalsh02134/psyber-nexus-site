@@ -66,7 +66,10 @@ function renderItem(role, text, timeStr = ts()) {
   actionsRow.setAttribute('aria-label', 'Message actions');
   actionsRow.innerHTML = `
     <button class="icon-btn copy-md" aria-label="Copy as Markdown" title="Copy as Markdown">
-      <img class="icon-img" src="/assets/icons/copy.svg" alt="" loading="lazy" decoding="async">
+      <img class="icon-img" src="/assets/icons/copy-2.svg" alt="" loading="lazy" decoding="async">
+    </button>
+    <button class="icon-btn share-msg" aria-label="Share message" title="Share message">
+      <img class="icon-img" src="/assets/icons/share-2.svg" alt="" loading="lazy" decoding="async">
     </button>
   `;
   li.appendChild(meta);
@@ -475,6 +478,20 @@ function init() {
     const text = li.querySelector('.content')?.textContent || '';
     const msg = list[index] || { role, content: text };
     await copyText(msgToMarkdown(msg));
+  });
+
+  // Per-message delegated actions (share as plain text)
+  els.log?.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.share-msg');
+    if (!btn) return;
+    const li = e.target.closest('.msg');
+    if (!li) return;
+    const index = Array.prototype.indexOf.call(els.log.children, li);
+    const list = messages.filter(m => m.role !== 'system');
+    const role = li.classList.contains('user') ? 'user' : 'assistant';
+    const text = li.querySelector('.content')?.textContent || '';
+    const msg = list[index] || { role, content: text };
+    await shareText(msgToPlain(msg));
   });
 
   // Thread actions
