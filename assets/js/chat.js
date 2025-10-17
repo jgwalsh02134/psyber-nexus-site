@@ -312,14 +312,28 @@ async function shareText(text){
 // --- Helpers for scroll management ---
 const logEl = document.getElementById('chat-log');
 const jumpBtn = document.getElementById('jump-latest');
+const inputElDom = document.getElementById('chat-input');
 
-function isNearBottom(el, thresh = 32){
+function isNearBottom(el, thresh = 48){
   return el.scrollHeight - el.scrollTop - el.clientHeight <= thresh;
 }
 function scrollToBottom(el){ el.scrollTop = el.scrollHeight; }
 
+// Dynamic viewport height for iOS keyboard safety
+(function initVisualViewport(){
+  const vv = globalThis.visualViewport;
+  function setVVH(){
+    const h = vv ? Math.min(vv.height, globalThis.innerHeight) : globalThis.innerHeight;
+    document.documentElement.style.setProperty('--vvh', `${h}px`);
+  }
+  setVVH();
+  vv && vv.addEventListener('resize', setVVH);
+  globalThis.addEventListener('orientationchange', setVVH);
+})();
+
 if (logEl){
   shouldStick = isNearBottom(logEl);
+  if (jumpBtn) jumpBtn.hidden = shouldStick;
   logEl.addEventListener('scroll', () => {
     const near = isNearBottom(logEl);
     shouldStick = near;
@@ -329,8 +343,26 @@ if (logEl){
     scrollToBottom(logEl);
     shouldStick = true;
     jumpBtn.hidden = true;
+    // keep composer visible and focused
+    inputElDom?.focus();
   });
 }
+
+// On input focus/click, ensure the composer remains visible above the keyboard
+['focus','click'].forEach(evt => {
+  inputElDom?.addEventListener(evt, () => {
+    globalThis.setTimeout(() => { if (logEl) scrollToBottom(logEl); }, 60);
+  });
+});
+
+// Fallback: if new nodes are added to the log, pin to bottom when shouldStick
+(function observeNewNodes(){
+  if (!logEl) return;
+  const MO = globalThis.MutationObserver;
+  if (!MO) return;
+  const mo = new MO(() => { if (shouldStick) scrollToBottom(logEl); });
+  mo.observe(logEl, { childList: true });
+})();
 
 function init() {
   const saved = loadSaved();

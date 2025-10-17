@@ -91,6 +91,8 @@ code, pre{ font-family:var(--pn-font-mono); }
   --font-mono: var(--pn-font-mono);
   /* layout */
   --header-h: 56px;
+  /* dynamic viewport height for iOS keyboard; updated via JS */
+  --vvh: 100dvh;
 }
 
 * { box-sizing: border-box; }
@@ -256,10 +258,10 @@ input:focus-visible, textarea:focus-visible, .btn:focus-visible, a:focus-visible
 /* Chat page styles */
 .chat-shell{display:grid;gap:16px}
 @media (min-width:900px){.chat-shell{grid-template-columns:2fr 1fr}}
-.chat-panel{border:1px solid var(--line);background:rgba(255,255,255,.02);border-radius:var(--radius,12px);padding:12px;min-height:calc(100dvh - var(--header-h) - 16px);display:flex;flex-direction:column}
+.chat-panel{border:1px solid var(--line);background:rgba(255,255,255,.02);border-radius:var(--radius,12px);padding:12px;min-height:calc(var(--vvh) - var(--header-h));display:flex;flex-direction:column}
 .chat-header{position:sticky;top:56px;z-index:5;display:flex;align-items:center;gap:8px;padding:6px 0}
 .chat-header .grow{flex:1}
-.chat-log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;flex:1 1 auto;overflow:auto;scroll-behavior:smooth;padding-bottom:12px}
+.chat-log{list-style:none;margin:0;padding:8px 0 12px;display:flex;flex-direction:column;gap:10px;flex:1 1 auto;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;scroll-padding-bottom:96px}
 .msg{display:grid;gap:6px;padding:10px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03);max-width:80ch}
 .msg .meta{font-size:.8rem;color:var(--muted)}
 .msg .content{white-space:pre-wrap;word-break:break-word}
@@ -272,13 +274,13 @@ input:focus-visible, textarea:focus-visible, .btn:focus-visible, a:focus-visible
 .msg-actions-row{display:flex;gap:6px;opacity:0;transition:opacity .15s}
 .msg:hover .msg-actions-row,.msg:focus-within .msg-actions-row{opacity:1}
 @media (hover:none){.msg-actions-row{opacity:1}}
-.chat-form{margin-top:auto;display:grid;gap:8px}
+.chat-form{margin-top:auto;display:grid;gap:8px;flex:0 0 auto;position:sticky;bottom:0;padding-bottom:max(12px, env(safe-area-inset-bottom));background:linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,.12) 18%, rgba(0,0,0,.18) 40%);backdrop-filter:blur(2px)}
 #chat-input{resize:none;overflow:auto;max-height:10lh;min-height:2.4rem;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface,#0f172a);color:var(--ink)}
 .chat-actions{display:flex;gap:8px;justify-content:flex-end}
 .btn--spin{position:relative;color:transparent}
 .btn--spin::after{content:"";position:absolute;inset:0;margin:auto;width:1rem;height:1rem;border:.18rem solid rgba(255,255,255,.3);border-top-color:currentColor;border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.to-bottom{position:sticky;bottom:12px;margin-left:auto;z-index:5}
+.to-bottom{position:sticky;bottom:110px;margin-left:auto;z-index:5}
 .chat-alert{min-height:1.2rem;color:var(--muted);font-size:.9rem}
 .chip-list{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0;padding:0;list-style:none}
 .chip{border:1px solid var(--line);border-radius:999px;padding:.35rem .7rem;background:transparent;color:var(--ink)}
