@@ -80,9 +80,11 @@ function renderItem(role, text, timeStr = ts()) {
 function renderHistory(saved) {
   els.log.innerHTML = '';
   for (const m of saved) {
-    if (m.role === 'assistant' && typeof m.html === 'string' && m.html) {
+    if (m.role === 'assistant') {
       const { contentEl } = renderItem(m.role, '');
-      contentEl.innerHTML = m.html;
+      const html = (typeof m.html === 'string' && m.html) ? m.html : renderMarkdownSafe(m.md || m.content || '');
+      contentEl.innerHTML = html;
+      mdProbe('restore');
     } else {
       renderItem(m.role, m.content);
     }
@@ -189,6 +191,7 @@ async function streamTo(el, onDone) {
                   assistantPlain = stripMarkdown(assistantMd);
                   const html = renderMarkdownSafe(assistantMd);
                   el.innerHTML = html;
+                  mdProbe('chunk');
                   if (shouldStick && logEl) scrollToBottom(logEl);
                 }
               }
@@ -201,6 +204,7 @@ async function streamTo(el, onDone) {
               assistantPlain = stripMarkdown(assistantMd);
               const html = renderMarkdownSafe(assistantMd);
               el.innerHTML = html;
+              mdProbe('chunk');
               if (shouldStick && logEl) scrollToBottom(logEl);
             }
           } catch { /* noop */ }
@@ -214,8 +218,8 @@ async function streamTo(el, onDone) {
       els.alert.textContent = 'Generation stopped.';
     } else {
       els.alert.textContent = 'Error occurred. Please try again.';
-      // append hint to assistant bubble
-      el.textContent += ' (error)';
+      const appended = (assistantMd || '') + ' (error)';
+      el.innerHTML = renderMarkdownSafe(appended);
     }
   } finally {
     setUIBusy(false);
@@ -234,6 +238,7 @@ function onSubmit(e) {
 
   // assistant placeholder
   const { contentEl } = renderItem('assistant', '');
+  mdProbe('start');
 
   els.input.value = '';
   growTextarea();
@@ -301,17 +306,24 @@ function stripMarkdown(md){
 function renderMarkdownSafe(mdText){
   try{
     const src = String(mdText || '');
+    const ok = !!globalThis.__md_ok__ || (globalThis.marked && globalThis.DOMPurify);
     const markedLib = globalThis.marked;
     const purifier = globalThis.DOMPurify;
+    if (!ok || !purifier) return src;
     if (markedLib && typeof markedLib.setOptions === 'function') {
       try { markedLib.setOptions({ breaks: true, smartypants: true }); } catch { /* noop */ }
     }
     const dirty = (markedLib && typeof markedLib.parse === 'function') ? markedLib.parse(src) : src;
-    if (purifier && typeof purifier.sanitize === 'function'){
-      return purifier.sanitize(dirty, { USE_PROFILES: { html: true } });
-    }
-    return dirty;
-  }catch{ return String(mdText || ''); }
+    return purifier.sanitize(dirty, { USE_PROFILES: { html: true } });
+  }catch(e){
+    try{ const purifier = globalThis.DOMPurify; return purifier ? purifier.sanitize(String(mdText ?? '')) : String(mdText ?? ''); }
+    catch{ return String(mdText ?? ''); }
+  }
+}
+
+function mdProbe(label){
+  if (!globalThis.__md_probe__) { globalThis.__md_probe__ = true; console.info('[MD] Markdown pipeline active'); }
+  if (label) console.debug('[MD]', label);
 }
 
 // Toast-like inline status
