@@ -97,9 +97,9 @@ code, pre{ font-family:var(--pn-font-mono); }
   --rail-max: 62rem;
   --bubble-max: 80ch;
   --fs-base: clamp(0.98rem, 0.92rem + 0.35vw, 1.06rem);
-  --fs-msg:  clamp(1.00rem, 0.96rem + 0.30vw, 1.10rem);
+  --fs-msg:  clamp(1.00rem, 0.96rem + 0.30vw, 1.06rem);
   --lh-body: 1.60; 
-  --lh-msg:  1.66;
+  --lh-msg:  1.5;
   --gap-xs: 10px; --gap-sm: 14px; --gap-md: 20px; --gap-lg: 28px;
 }
 
@@ -289,21 +289,22 @@ input:focus-visible, textarea:focus-visible, .btn:focus-visible, a:focus-visible
 .msg.assistant{margin-inline:0 auto}
 .msg.user{margin-inline:auto 0;background:rgba(31,111,235,.10);border-color:color-mix(in oklab,var(--brand,#1f6feb),white 60%)}
 .msg .meta{font-size:.85em;color:var(--muted)}
-.msg .content{white-space:pre-wrap;word-break:break-word}
-.msg .text{white-space:pre-wrap;word-break:break-word}
+.msg .content{white-space:normal;word-break:break-word}
+.msg .text{white-space:normal;word-break:break-word}
 .msg pre{background:rgba(255,255,255,.04);border:1px solid var(--line);padding:12px;border-radius:12px;overflow:auto}
 .msg code,.msg pre code{font:400 .94rem/1.45 var(--pn-font-mono,ui-monospace,SFMono-Regular,Menlo,Consolas,monospace)}
 /* Markdown elements inside message bubbles */
-.msg :where(h1,h2,h3){ font-weight:700; line-height:1.25; margin-block:.6em .35em; }
-.msg h1{ font-size: clamp(1.25rem, 1.1rem + 1vw, 1.6rem); }
-.msg h2{ font-size: clamp(1.15rem, 1.05rem + .8vw, 1.45rem); }
-.msg h3{ font-size: clamp(1.07rem, 1rem + .6vw, 1.25rem); }
-.msg p{ margin-block:.6em; }
-.msg ul{ list-style: disc; padding-left: 1.25rem; margin-block:.6em; }
-.msg ol{ list-style: decimal; padding-left: 1.25rem; margin-block:.6em; }
-.msg blockquote{ border-left:3px solid color-mix(in oklab, var(--brand,#1f6feb), white 20%); padding-left:.9rem; margin:.8rem 0; color: var(--muted); }
-.msg pre{ background: rgba(5,9,20,.9); color:#E6EDF3; border:1px solid #243046; }
-.msg code{ background:rgba(5,9,20,.55); color:#E6EDF3; padding:.1rem .35rem; border-radius:6px; }
+.msg :where(h1,h2,h3){ font-weight:700; line-height:1.28; margin-block:.55rem .3rem; }
+.msg h1{ font-size: clamp(1.22rem, 1.05rem + 1.0vw, 1.55rem); }
+.msg h2{ font-size: clamp(1.14rem, 1.02rem + 0.8vw, 1.35rem); }
+.msg h3{ font-size: clamp(1.07rem, 1.0rem + 0.6vw, 1.22rem); }
+.msg p{ margin-block:.45rem; line-height: var(--lh-msg); }
+.msg ul{ list-style: disc; padding-left: 1.1rem; margin-block:.45rem; }
+.msg ol{ list-style: decimal; padding-left: 1.1rem; margin-block:.45rem; }
+.msg li{ margin-block:.20rem; }
+.msg blockquote{ border-left:3px solid color-mix(in oklab, var(--brand,#1f6feb), white 22%); padding-left:.8rem; margin:.6rem 0; color: var(--muted); }
+.msg pre{ background: rgba(5,9,20,.92); color:#E6EDF3; border:1px solid #243046; border-radius:12px; padding:10px 12px; line-height:1.45; margin-block:.5rem; overflow:auto }
+.msg code{ background:rgba(5,9,20,.55); color:#E6EDF3; padding:.05rem .35rem; border-radius:6px; }
 .icon-btn{display:inline-grid;place-items:center;width:clamp(40px,36px + 1vw,44px);height:clamp(40px,36px + 1vw,44px);border:1px solid var(--line);border-radius:10px;background:transparent;opacity:.9;color:inherit}
 .icon-btn:hover,.icon-btn:focus-visible{opacity:1;outline:2px solid var(--brand);outline-offset:2px}
 .icon-img{width:18px;height:18px;display:block;pointer-events:none}
