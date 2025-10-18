@@ -5,3 +5,7 @@ node_modules/
 
 #Ignore windsurf AI rules
 .windsurfrules
+
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md
